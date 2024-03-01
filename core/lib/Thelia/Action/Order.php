@@ -244,14 +244,14 @@ class Order extends BaseAction implements EventSubscriberInterface
 
         $manageStock = $placedOrder->isStockManagedOnOrderCreation($dispatcher);
 
-            $deliveryModuleName = ModuleQuery::create()->findPk($sessionOrder->getDeliveryModuleId())->getCode();
+            $deliveryModuleName = ModuleQuery::create()->findPk($sessionOrder->getDeliveryModuleId())->getTitle();
             $orderModuleDelivery = new OrderModuleDelivery();
             $orderModuleDelivery
                 ->setOrderId($placedOrder->getId())
                 ->setDeliveryModuleName($deliveryModuleName)
                 ->save($con);
 
-            $paymentModuleName = ModuleQuery::create()->findPk($sessionOrder->getPaymentModuleId())->getCode();
+            $paymentModuleName = ModuleQuery::create()->findPk($sessionOrder->getPaymentModuleId())->getTitle();
             $orderModulePayment = new OrderModulePayment();
             $orderModulePayment
                 ->setOrderId($placedOrder->getId())
