@@ -52,6 +52,7 @@ class BaseModule implements BaseModuleInterface
     use ContainerAwareTrait;
 
     public const CLASSIC_MODULE_TYPE = 1;
+
     public const DELIVERY_MODULE_TYPE = 2;
     public const PAYMENT_MODULE_TYPE = 3;
 

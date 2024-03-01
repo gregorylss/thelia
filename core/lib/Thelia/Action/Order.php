@@ -41,6 +41,8 @@ use Thelia\Model\Order as ModelOrder;
 use Thelia\Model\Order as OrderModel;
 use Thelia\Model\OrderAddress;
 use Thelia\Model\OrderAddressQuery;
+use Thelia\Model\OrderModuleDelivery;
+use Thelia\Model\OrderModulePayment;
 use Thelia\Model\OrderProduct;
 use Thelia\Model\OrderProductAttributeCombination;
 use Thelia\Model\OrderProductTax;
@@ -148,8 +150,8 @@ class Order extends BaseAction implements EventSubscriberInterface
         LangModel $lang,
         CartModel $cart,
         UserInterface $customer,
-        $unusedArgument = null,
-        $useOrderDefinedAddresses = false
+                                 $unusedArgument = null,
+                                 $useOrderDefinedAddresses = false
     ) {
         $con = Propel::getConnection(
             OrderTableMap::DATABASE_NAME
@@ -242,6 +244,19 @@ class Order extends BaseAction implements EventSubscriberInterface
 
         $manageStock = $placedOrder->isStockManagedOnOrderCreation($dispatcher);
 
+            $deliveryModuleName = ModuleQuery::create()->findPk($sessionOrder->getDeliveryModuleId())->getCode();
+            $orderModuleDelivery = new OrderModuleDelivery();
+            $orderModuleDelivery
+                ->setOrderId($placedOrder->getId())
+                ->setDeliveryModuleName($deliveryModuleName)
+                ->save($con);
+
+            $paymentModuleName = ModuleQuery::create()->findPk($sessionOrder->getPaymentModuleId())->getCode();
+            $orderModulePayment = new OrderModulePayment();
+            $orderModulePayment
+                ->setOrderId($placedOrder->getId())
+                ->setPaymentModuleName($paymentModuleName)
+                ->save($con);
         /* fulfill order_products and decrease stock */
 
         foreach ($cartItems as $cartItem) {
@@ -396,7 +411,6 @@ class Order extends BaseAction implements EventSubscriberInterface
         $session = $this->getSession();
 
         $order = $event->getOrder();
-        $paymentModule = ModuleQuery::create()->findPk($order->getPaymentModuleId());
 
         $placedOrder = $this->createOrder(
             $dispatcher,
