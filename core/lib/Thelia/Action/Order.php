@@ -244,20 +244,25 @@ class Order extends BaseAction implements EventSubscriberInterface
 
         $manageStock = $placedOrder->isStockManagedOnOrderCreation($dispatcher);
 
-            $deliveryModuleName = ModuleQuery::create()->findPk($sessionOrder->getDeliveryModuleId())->getTitle();
-            $orderModuleDelivery = new OrderModuleDelivery();
-            $orderModuleDelivery
+        $deliveryModuleName = ModuleQuery::create()->findPk($sessionOrder->getDeliveryModuleId())->getTitle();
+        if (null === $deliveryModuleName) {
+            throw new TheliaProcessException('Delivery module not found');
+        }
+        $orderModuleDelivery = new OrderModuleDelivery();
+        $orderModuleDelivery
                 ->setOrderId($placedOrder->getId())
                 ->setDeliveryModuleName($deliveryModuleName)
                 ->save($con);
 
-            $paymentModuleName = ModuleQuery::create()->findPk($sessionOrder->getPaymentModuleId())->getTitle();
-            $orderModulePayment = new OrderModulePayment();
-            $orderModulePayment
+        $paymentModuleName = ModuleQuery::create()->findPk($sessionOrder->getPaymentModuleId())->getTitle();
+        if (null === $paymentModuleName) {
+            throw new TheliaProcessException('Payment module not found');
+        }
+        $orderModulePayment = new OrderModulePayment();
+        $orderModulePayment
                 ->setOrderId($placedOrder->getId())
                 ->setPaymentModuleName($paymentModuleName)
                 ->save($con);
-        /* fulfill order_products and decrease stock */
 
         foreach ($cartItems as $cartItem) {
             $product = $cartItem->getProduct();
