@@ -93,7 +93,18 @@ class Order extends BaseAction implements EventSubscriberInterface
 
         $deliveryModuleId = $event->getDeliveryModule();
 
-        $order->setDeliveryModuleId($deliveryModuleId);
+        $deliveryModuleName = ModuleQuery::create()->findPk($deliveryModuleId);
+
+        if (null === $deliveryModuleId) {
+            throw new TheliaProcessException('Delivery module not found');
+        }
+
+        $deliveryModuleName = $deliveryModuleName->getTitle();
+
+        $orderModuleDelivery = new OrderModuleDelivery();
+        $orderModuleDelivery
+            ->setOrderId($order->getId())
+            ->setDeliveryModuleName($deliveryModuleName);
 
         // Reset postage cost if the delivery module had been removed
         if ($deliveryModuleId <= 0) {
@@ -129,7 +140,20 @@ class Order extends BaseAction implements EventSubscriberInterface
     {
         $order = $event->getOrder();
 
-        $order->setPaymentModuleId($event->getPaymentModule());
+        $paymentModuleId = $event->getPaymentModule();
+
+        $paymentModuleName = ModuleQuery::create()->findPk($paymentModuleId);
+
+        if (null === $paymentModuleId) {
+            throw new TheliaProcessException('Payment module not found');
+        }
+
+        $paymentModuleName = $paymentModuleName->getTitle();
+
+        $orderModulePayment = new OrderModulePayment();
+        $orderModulePayment
+            ->setOrderId($order->getId())
+            ->setPaymentModuleName($paymentModuleName);
 
         $event->setOrder($order);
     }
@@ -243,26 +267,6 @@ class Order extends BaseAction implements EventSubscriberInterface
         $placedOrder->save($con);
 
         $manageStock = $placedOrder->isStockManagedOnOrderCreation($dispatcher);
-
-        $deliveryModuleName = ModuleQuery::create()->findPk($sessionOrder->getDeliveryModuleId())->getTitle();
-        if (null === $deliveryModuleName) {
-            throw new TheliaProcessException('Delivery module not found');
-        }
-        $orderModuleDelivery = new OrderModuleDelivery();
-        $orderModuleDelivery
-                ->setOrderId($placedOrder->getId())
-                ->setDeliveryModuleName($deliveryModuleName)
-                ->save($con);
-
-        $paymentModuleName = ModuleQuery::create()->findPk($sessionOrder->getPaymentModuleId())->getTitle();
-        if (null === $paymentModuleName) {
-            throw new TheliaProcessException('Payment module not found');
-        }
-        $orderModulePayment = new OrderModulePayment();
-        $orderModulePayment
-                ->setOrderId($placedOrder->getId())
-                ->setPaymentModuleName($paymentModuleName)
-                ->save($con);
 
         foreach ($cartItems as $cartItem) {
             $product = $cartItem->getProduct();
