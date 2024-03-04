@@ -80,8 +80,7 @@
         "thelia/thelia-blocks-module": "^2.0.3-beta",
         "thelia/thelia-library-module": "^1.1.7",
         "thelia/product-loop-attribute-filter-module": "~2.0.0",
-        "doctrine/annotations": "^2.0",
-        "thelia/carousel-module": "^2.5"
+        "doctrine/annotations": "^2.0"
     },
     "require-dev": {
         "thelia/hooktest-module": "~1.1",
