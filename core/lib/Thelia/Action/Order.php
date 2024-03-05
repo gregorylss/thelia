@@ -42,10 +42,13 @@ use Thelia\Model\Order as OrderModel;
 use Thelia\Model\OrderAddress;
 use Thelia\Model\OrderAddressQuery;
 use Thelia\Model\OrderModuleDelivery;
+use Thelia\Model\OrderModuleDeliveryQuery;
 use Thelia\Model\OrderModulePayment;
+use Thelia\Model\OrderModulePaymentQuery;
 use Thelia\Model\OrderProduct;
 use Thelia\Model\OrderProductAttributeCombination;
 use Thelia\Model\OrderProductTax;
+use Thelia\Model\OrderQuery;
 use Thelia\Model\OrderStatusQuery;
 use Thelia\Model\OrderVersionQuery;
 use Thelia\Model\ProductI18n;
@@ -53,6 +56,8 @@ use Thelia\Model\ProductSaleElements;
 use Thelia\Model\ProductSaleElementsQuery;
 use Thelia\Model\TaxRuleI18n;
 use Thelia\Tools\I18n;
+
+
 
 /**
  * Class Order.
@@ -99,12 +104,14 @@ class Order extends BaseAction implements EventSubscriberInterface
             throw new TheliaProcessException('Delivery module not found');
         }
 
+        $con = Propel::getConnection();
+        $con->exec("SET FOREIGN_KEY_CHECKS=0;");
+
         $deliveryModuleName = $deliveryModuleName->getTitle();
 
         $orderModuleDelivery = new OrderModuleDelivery();
-        $orderModuleDelivery
-            ->setOrderId($order->getId())
-            ->setDeliveryModuleName($deliveryModuleName);
+        $orderModuleDelivery->setDeliveryModuleName($deliveryModuleName);
+        $orderModuleDelivery->save();
 
         // Reset postage cost if the delivery module had been removed
         if ($deliveryModuleId <= 0) {
@@ -112,6 +119,8 @@ class Order extends BaseAction implements EventSubscriberInterface
             $order->setPostageTax(0);
             $order->setPostageTaxRuleTitle(null);
         }
+
+        $order->setDeliveryModuleId($deliveryModuleId);
 
         $event->setOrder($order);
     }
@@ -148,12 +157,17 @@ class Order extends BaseAction implements EventSubscriberInterface
             throw new TheliaProcessException('Payment module not found');
         }
 
-        $paymentModuleName = $paymentModuleName->getTitle();
+        $con = Propel::getConnection();
+        $con->exec("SET FOREIGN_KEY_CHECKS=0;");
 
+        $paymentModuleName = $paymentModuleName->getTitle();
         $orderModulePayment = new OrderModulePayment();
-        $orderModulePayment
-            ->setOrderId($order->getId())
-            ->setPaymentModuleName($paymentModuleName);
+        $orderModulePayment->setPaymentModuleName($paymentModuleName);
+        $orderModulePayment->save();
+
+        $con->exec("SET FOREIGN_KEY_CHECKS=1;");
+
+        $order->setPaymentModuleId($paymentModuleId);
 
         $event->setOrder($order);
     }
@@ -267,6 +281,8 @@ class Order extends BaseAction implements EventSubscriberInterface
         $placedOrder->save($con);
 
         $manageStock = $placedOrder->isStockManagedOnOrderCreation($dispatcher);
+
+        /* fulfill order_products and decrease stock */
 
         foreach ($cartItems as $cartItem) {
             $product = $cartItem->getProduct();
@@ -419,8 +435,6 @@ class Order extends BaseAction implements EventSubscriberInterface
     {
         $session = $this->getSession();
 
-        $order = $event->getOrder();
-
         $placedOrder = $this->createOrder(
             $dispatcher,
             $event->getOrder(),
@@ -439,13 +453,28 @@ class Order extends BaseAction implements EventSubscriberInterface
         /* call pay method */
         $payEvent = new OrderPaymentEvent($placedOrder);
 
+        $order = $event->getPlacedOrder();
+
+        $orderpaymentname = ModuleQuery::create()->findOneByCategory('payment')->getTitle();
+        $orderdeliveryname = ModuleQuery::create()->findOneByCategory('delivery')->getTitle();
+
+        $orderModuleDelivery = new OrderModuleDelivery();
+        $orderModuleDelivery->setOrderId($order->getId());
+        $orderModuleDelivery->setDeliveryModuleName($orderdeliveryname);
+        $orderModuleDelivery->save();
+
+        $orderModulePayment = new OrderModulePayment();
+        $orderModulePayment->setOrderId($order->getId());
+        $orderModulePayment->setPaymentModuleName($orderpaymentname);
+        $orderModulePayment->save();
+
+
         $dispatcher->dispatch($payEvent, TheliaEvents::MODULE_PAY);
 
         if ($payEvent->hasResponse()) {
             $event->setResponse($payEvent->getResponse());
         }
     }
-
     public function orderBeforePayment(OrderEvent $event, $eventName, EventDispatcherInterface $dispatcher): void
     {
         $dispatcher->dispatch(clone $event, TheliaEvents::ORDER_SEND_CONFIRMATION_EMAIL);
