@@ -92,24 +92,20 @@ class Order extends BaseAction implements EventSubscriberInterface
         $event->setOrder($order);
     }
 
-    public function setDeliveryModule(OrderEvent $event): void
+    public function setDeliveryModule(OrderEvent $event,): void
     {
         $order = $event->getOrder();
 
         $deliveryModuleId = $event->getDeliveryModule();
 
-        $deliveryModuleName = ModuleQuery::create()->findPk($deliveryModuleId);
-
         if (null === $deliveryModuleId) {
-            throw new TheliaProcessException('Delivery module not found');
+            throw new \InvalidArgumentException('Delivery module ID cannot be null');
         }
 
-        $con = Propel::getConnection();
-        $con->exec("SET FOREIGN_KEY_CHECKS=0;");
-
-        $deliveryModuleName = $deliveryModuleName->getTitle();
+        $deliveryModuleName = ModuleQuery::create()->findOneById($deliveryModuleId)->getTitle();
 
         $orderModuleDelivery = new OrderModuleDelivery();
+        $orderModuleDelivery->setId($order->getId());
         $orderModuleDelivery->setDeliveryModuleName($deliveryModuleName);
         $orderModuleDelivery->save();
 
@@ -119,6 +115,8 @@ class Order extends BaseAction implements EventSubscriberInterface
             $order->setPostageTax(0);
             $order->setPostageTaxRuleTitle(null);
         }
+
+        $order->setOrderDeliveryModuleId($orderModuleDelivery->getId());
 
         $order->setDeliveryModuleId($deliveryModuleId);
 
@@ -151,21 +149,18 @@ class Order extends BaseAction implements EventSubscriberInterface
 
         $paymentModuleId = $event->getPaymentModule();
 
-        $paymentModuleName = ModuleQuery::create()->findPk($paymentModuleId);
-
         if (null === $paymentModuleId) {
-            throw new TheliaProcessException('Payment module not found');
+            throw new \InvalidArgumentException('Payment module ID cannot be null');
         }
 
-        $con = Propel::getConnection();
-        $con->exec("SET FOREIGN_KEY_CHECKS=0;");
+        $paymentModuleName = ModuleQuery::create()->findOneById($paymentModuleId)->getTitle();
 
-        $paymentModuleName = $paymentModuleName->getTitle();
         $orderModulePayment = new OrderModulePayment();
+        $orderModulePayment->setId($order->getId());
         $orderModulePayment->setPaymentModuleName($paymentModuleName);
         $orderModulePayment->save();
 
-        $con->exec("SET FOREIGN_KEY_CHECKS=1;");
+        $order->setOrderPaymentModuleId($orderModulePayment->getId());
 
         $order->setPaymentModuleId($paymentModuleId);
 
@@ -452,22 +447,6 @@ class Order extends BaseAction implements EventSubscriberInterface
 
         /* call pay method */
         $payEvent = new OrderPaymentEvent($placedOrder);
-
-        $order = $event->getPlacedOrder();
-
-        $orderpaymentname = ModuleQuery::create()->findOneByCategory('payment')->getTitle();
-        $orderdeliveryname = ModuleQuery::create()->findOneByCategory('delivery')->getTitle();
-
-        $orderModuleDelivery = new OrderModuleDelivery();
-        $orderModuleDelivery->setOrderId($order->getId());
-        $orderModuleDelivery->setDeliveryModuleName($orderdeliveryname);
-        $orderModuleDelivery->save();
-
-        $orderModulePayment = new OrderModulePayment();
-        $orderModulePayment->setOrderId($order->getId());
-        $orderModulePayment->setPaymentModuleName($orderpaymentname);
-        $orderModulePayment->save();
-
 
         $dispatcher->dispatch($payEvent, TheliaEvents::MODULE_PAY);
 
