@@ -384,7 +384,7 @@
                                                 <tbody>
                                                 <tr>
                                                     <th>{intl l="Payment module"}</th>
-                                                    <td>{loop name="payment-module" type="module" id=$PAYMENT_MODULE order="code"}{$CODE} - {$TITLE}{/loop}</td>
+                                                    <td>{loop name="payment-module" type="order"  id=$ID} {$PAYMENT_MODULE} {/loop}</td>
                                                 </tr>
                                                 <tr>
                                                     <th>{intl l="Transaction reference"}</th>
@@ -420,12 +420,8 @@
                                                         <h3 class="panel-title">{intl l='Delivery module'}</h3>
                                                     </div>
                                                     <div class="panel-body">
-                                                        {loop name="delivery-module" type="module" id=$DELIVERY_MODULE order="code"}
-                                                            <p class="payment-module-title"><strong>{$CODE} - {$TITLE}</strong></p>
-
-                                                        {if $DESCRIPTION}
-                                                            <div class="payment-module-description">{$DESCRIPTION nofilter}</div>
-                                                        {/if}
+                                                        {loop name="delivery-module" type="order" id=$ID}
+                                                            <p class="payment-module-title"><strong>{$DELIVERY_MODULE} </strong></p>
                                                         {/loop}
                                                     </div>
 

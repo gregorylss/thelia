@@ -25,6 +25,8 @@ use Thelia\Model\CustomerQuery;
 use Thelia\Model\Map\CustomerTableMap;
 use Thelia\Model\Map\OrderAddressTableMap;
 use Thelia\Model\OrderAddressQuery;
+use Thelia\Model\OrderModuleDeliveryQuery;
+use Thelia\Model\OrderModulePaymentQuery;
 use Thelia\Model\OrderQuery;
 use Thelia\TaxEngine\Calculator;
 use Thelia\Type;
@@ -333,6 +335,38 @@ class Order extends BaseLoop implements SearchLoopInterface, PropelSearchLoopInt
 
             $hasVirtualDownload = $order->hasVirtualProduct();
 
+            $orderDeliveryModuleId = $order->getOrderDeliveryModuleId();
+
+            try {
+                $orderModuleDelivery = OrderModuleDeliveryQuery::create()
+                    ->filterByModuleId($orderDeliveryModuleId)
+                    ->findOne();
+
+                if ($orderModuleDelivery) {
+                    $deliveryModuleName = $orderModuleDelivery->getDeliveryModuleName();
+                } else {
+                    $deliveryModuleName = 'Nom non trouvé';
+                }
+            } catch (Exception $e) {
+                $deliveryModuleName = 'Erreur: ' . $e->getMessage();
+            }
+
+            $orderPaymentModuleId = $order->getOrderPaymentModuleId();
+
+            try {
+                $orderModulePayment = OrderModulePaymentQuery::create()
+                    ->filterByModuleId($orderPaymentModuleId)
+                    ->findOne();
+
+                if ($orderModulePayment) {
+                    $paymentModuleName = $orderModulePayment->getPaymentModuleName();
+                } else {
+                    $paymentModuleName = 'Nom non trouvé';
+                }
+            } catch (Exception $e) {
+                $paymentModuleName = 'Erreur: ' . $e->getMessage();
+            }
+
             $loopResultRow = new LoopResultRow($order);
             $loopResultRow
                 ->set('ID', $order->getId())
@@ -351,8 +385,8 @@ class Order extends BaseLoop implements SearchLoopInterface, PropelSearchLoopInt
                 ->set('POSTAGE_TAX', $order->getPostageTax())
                 ->set('POSTAGE_UNTAXED', $order->getUntaxedPostage())
                 ->set('POSTAGE_TAX_RULE_TITLE', $order->getPostageTaxRuleTitle())
-                ->set('PAYMENT_MODULE', $order->getPaymentModuleId())
-                ->set('DELIVERY_MODULE', $order->getDeliveryModuleId())
+                ->set('PAYMENT_MODULE', $paymentModuleName)
+                ->set('DELIVERY_MODULE', $deliveryModuleName)
                 ->set('STATUS', $order->getStatusId())
                 ->set('STATUS_CODE', $order->getOrderStatus()->getCode())
                 ->set('LANG', $order->getLangId())

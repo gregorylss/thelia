@@ -31,7 +31,7 @@
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         {loop type="order" name="failed-order" id=$failed_order_id}
-                            {intl l="You choose to pay by"} : <span class="payment-method label label-primary">{loop name="payment-module" type="module" id=$PAYMENT_MODULE}{$TITLE}{/loop}</span>
+                            {intl l="You choose to pay by"} : <span class="payment-method label label-primary">{loop name="payment-module" type="order" id=$ID}{$PAYMENT_MODULE}{/loop}</span>
                         {/loop}
                         {elseloop rel="failed-order"}
                             {intl l="Your order payment"}

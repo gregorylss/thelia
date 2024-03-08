@@ -259,7 +259,7 @@
             <td  class="table-3-module" style="border-left:solid 3px #f6993c; padding-top: 2mm">
                 <h3>{intl l="Delivery module"}</h3>
                 <p>
-                    <span>{loop name="delivery-module" type="module" id=$DELIVERY_MODULE}{$TITLE}{/loop}</span>
+                    <span>{loop name="delivery-module" type="order" id=$ID}{$DELIVERY_MODULE}{/loop}</span>
                 </p>
 
                 {hook name="delivery.after-delivery-module" order=$order_id module_id=$DELIVERY_MODULE}
