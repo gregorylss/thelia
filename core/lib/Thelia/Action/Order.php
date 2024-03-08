@@ -105,7 +105,7 @@ class Order extends BaseAction implements EventSubscriberInterface
         $deliveryModuleName = ModuleQuery::create()->findOneById($deliveryModuleId)->getTitle();
 
         $orderModuleDelivery = new OrderModuleDelivery();
-        $orderModuleDelivery->setId($order->getId());
+        $orderModuleDelivery->setModuleId($deliveryModuleId);
         $orderModuleDelivery->setDeliveryModuleName($deliveryModuleName);
         $orderModuleDelivery->save();
 
@@ -116,9 +116,7 @@ class Order extends BaseAction implements EventSubscriberInterface
             $order->setPostageTaxRuleTitle(null);
         }
 
-        $order->setOrderDeliveryModuleId($orderModuleDelivery->getId());
-
-        $order->setDeliveryModuleId($deliveryModuleId);
+        $order->setOrderDeliveryModuleId($orderModuleDelivery->getModuleId());
 
         $event->setOrder($order);
     }
@@ -156,13 +154,12 @@ class Order extends BaseAction implements EventSubscriberInterface
         $paymentModuleName = ModuleQuery::create()->findOneById($paymentModuleId)->getTitle();
 
         $orderModulePayment = new OrderModulePayment();
-        $orderModulePayment->setId($order->getId());
+        $orderModulePayment->setModuleId($paymentModuleId);
         $orderModulePayment->setPaymentModuleName($paymentModuleName);
         $orderModulePayment->save();
 
-        $order->setOrderPaymentModuleId($orderModulePayment->getId());
 
-        $order->setPaymentModuleId($paymentModuleId);
+        $order->setOrderPaymentModuleId($orderModulePayment->getModuleId());
 
         $event->setOrder($order);
     }
