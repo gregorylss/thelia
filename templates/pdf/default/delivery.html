@@ -199,7 +199,7 @@
                 <h3>{intl l="Delivery address"}</h3>
 				{ifhook rel="delivery.delivery-address"}
                 {* delivery module can customize the delivery address *}
-                {hook name="delivery.delivery-address" module={$DELIVERY_MODULE} order=$order_id}
+                {hook name="delivery.delivery-address" module=$DELIVERY_MODULE}order=$order_id}
                 {/ifhook}
                 {elsehook rel="delivery.delivery-address"}
 				    {format_address order_address=$DELIVERY_ADDRESS locale=$locale}
@@ -259,7 +259,7 @@
             <td  class="table-3-module" style="border-left:solid 3px #f6993c; padding-top: 2mm">
                 <h3>{intl l="Delivery module"}</h3>
                 <p>
-                    <span>{loop name="delivery-module" type="order" id=$ID}{$DELIVERY_MODULE}{/loop}</span>
+                    <span>{$DELIVERY_MODULE} - {$DELIVERY_MODULE_CODE}</span>
                 </p>
 
                 {hook name="delivery.after-delivery-module" order=$order_id module_id=$DELIVERY_MODULE}

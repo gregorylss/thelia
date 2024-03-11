@@ -336,21 +336,6 @@ class Order extends BaseLoop implements SearchLoopInterface, PropelSearchLoopInt
             $hasVirtualDownload = $order->hasVirtualProduct();
 
             $orderDeliveryModuleId = $order->getOrderDeliveryModuleId();
-
-            try {
-                $orderModuleDelivery = OrderModuleDeliveryQuery::create()
-                    ->filterByModuleId($orderDeliveryModuleId)
-                    ->findOne();
-
-                if ($orderModuleDelivery) {
-                    $deliveryModuleName = $orderModuleDelivery->getDeliveryModuleName();
-                } else {
-                    $deliveryModuleName = 'Nom non trouvé';
-                }
-            } catch (Exception $e) {
-                $deliveryModuleName = 'Erreur: ' . $e->getMessage();
-            }
-
             $orderPaymentModuleId = $order->getOrderPaymentModuleId();
 
             try {
@@ -360,11 +345,28 @@ class Order extends BaseLoop implements SearchLoopInterface, PropelSearchLoopInt
 
                 if ($orderModulePayment) {
                     $paymentModuleName = $orderModulePayment->getPaymentModuleName();
+                    $PaymentModuleCode = $orderModulePayment->getPaymentModuleCode();
                 } else {
                     $paymentModuleName = 'Nom non trouvé';
+                    $PaymentModuleCode = 'Code non trouvé';
+                }
+
+                $orderModuleDelivery = OrderModuleDeliveryQuery::create()
+                    ->filterByModuleId($orderDeliveryModuleId)
+                    ->findOne();
+
+                if ($orderModuleDelivery) {
+                    $deliveryModuleName = $orderModuleDelivery->getDeliveryModuleName();
+                    $DeliveryModuleCode = $orderModuleDelivery->getDeliveryModuleCode();
+                } else {
+                    $deliveryModuleName = 'Nom non trouvé';
+                    $DeliveryModuleCode = 'Code non trouvé';
                 }
             } catch (Exception $e) {
                 $paymentModuleName = 'Erreur: ' . $e->getMessage();
+                $PaymentModuleCode = 'Erreur: ' . $e->getMessage();
+                $deliveryModuleName = 'Erreur: ' . $e->getMessage();
+                $DeliveryModuleCode = 'Erreur: ' . $e->getMessage();
             }
 
             $loopResultRow = new LoopResultRow($order);
@@ -386,7 +388,9 @@ class Order extends BaseLoop implements SearchLoopInterface, PropelSearchLoopInt
                 ->set('POSTAGE_UNTAXED', $order->getUntaxedPostage())
                 ->set('POSTAGE_TAX_RULE_TITLE', $order->getPostageTaxRuleTitle())
                 ->set('PAYMENT_MODULE', $paymentModuleName)
+                ->set('PAYMENT_MODULE_CODE', $PaymentModuleCode)
                 ->set('DELIVERY_MODULE', $deliveryModuleName)
+                ->set('DELIVERY_MODULE_CODE', $DeliveryModuleCode)
                 ->set('STATUS', $order->getStatusId())
                 ->set('STATUS_CODE', $order->getOrderStatus()->getCode())
                 ->set('LANG', $order->getLangId())

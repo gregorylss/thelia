@@ -279,7 +279,7 @@
 
                 <h3>{intl l="Payment module"}</h3>
                 <p>
-                    <span>{loop name="payment-module" type="order" id=$ID}{$PAYMENT_MODULE}{/loop}</span>
+                    <span>{$PAYMENT_MODULE} - {$PAYMENT_MODULE_CODE}</span>
                 </p>
 
                 {hook name="invoice.after-payment-module" order=$order_id module_id=$PAYMENT_MODULE}

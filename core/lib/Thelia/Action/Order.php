@@ -103,10 +103,12 @@ class Order extends BaseAction implements EventSubscriberInterface
         }
 
         $deliveryModuleName = ModuleQuery::create()->findOneById($deliveryModuleId)->getTitle();
+        $deliveryModuleCode = ModuleQuery::create()->findOneById($deliveryModuleId)->getCode();
 
         $orderModuleDelivery = new OrderModuleDelivery();
         $orderModuleDelivery->setModuleId($deliveryModuleId);
         $orderModuleDelivery->setDeliveryModuleName($deliveryModuleName);
+        $orderModuleDelivery->setDeliveryModuleCode($deliveryModuleCode);
         $orderModuleDelivery->save();
 
         // Reset postage cost if the delivery module had been removed
@@ -152,10 +154,12 @@ class Order extends BaseAction implements EventSubscriberInterface
         }
 
         $paymentModuleName = ModuleQuery::create()->findOneById($paymentModuleId)->getTitle();
+        $paymentModuleCode = ModuleQuery::create()->findOneById($paymentModuleId)->getCode();
 
         $orderModulePayment = new OrderModulePayment();
         $orderModulePayment->setModuleId($paymentModuleId);
         $orderModulePayment->setPaymentModuleName($paymentModuleName);
+        $orderModulePayment->setPaymentModuleCode($paymentModuleCode);
         $orderModulePayment->save();
 
 

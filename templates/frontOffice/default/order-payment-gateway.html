@@ -32,7 +32,7 @@
             {elsehook rel="order-payment-gateway.body"}
                 <div id="payment-success" class="panel panel-default">
                     <div class="panel-heading">
-                        <h3 class="panel-title">{intl l="You choose to pay by"} : <span class="payment-method label label-primary">{loop name="payment-module" type="order" id=$ID}{$PAYMENT_MODULE}{/loop}</span></h3>
+                        <h3 class="panel-title">{intl l="You choose to pay by"} : <span class="payment-method label label-primary">{$PAYMENT_MODULE}</span></h3>
                     </div>
 
                     <div class="panel-body">

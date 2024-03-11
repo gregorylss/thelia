@@ -686,7 +686,8 @@
     <column autoIncrement="true" primaryKey="true"  name="id" type="INTEGER" />
     <column name="payment_module_name" type="VARCHAR" size="255" />
     <column name="module_id" type="INTEGER" />
-<index name="idx_order_module_payment_module_id">
+    <column name="payment_module_code" type="VARCHAR" size="255" />
+    <index name="idx_order_module_payment_module_id">
       <index-column name="module_id" />
     </index>
   </table>
@@ -694,6 +695,7 @@
     <column autoIncrement="true" primaryKey="true" name="id" type="INTEGER" />
     <column name="delivery_module_name" type="VARCHAR" size="255" />
     <column name="module_id" type="INTEGER" />
+    <column name="delivery_module_code" type="VARCHAR" size="255" />
     <index name="idx_order_module_delivery_module_id">
       <index-column name="module_id" />
     </index>
