@@ -41,9 +41,14 @@ use Thelia\Model\Order as ModelOrder;
 use Thelia\Model\Order as OrderModel;
 use Thelia\Model\OrderAddress;
 use Thelia\Model\OrderAddressQuery;
+use Thelia\Model\OrderModuleDelivery;
+use Thelia\Model\OrderModuleDeliveryQuery;
+use Thelia\Model\OrderModulePayment;
+use Thelia\Model\OrderModulePaymentQuery;
 use Thelia\Model\OrderProduct;
 use Thelia\Model\OrderProductAttributeCombination;
 use Thelia\Model\OrderProductTax;
+use Thelia\Model\OrderQuery;
 use Thelia\Model\OrderStatusQuery;
 use Thelia\Model\OrderVersionQuery;
 use Thelia\Model\ProductI18n;
@@ -51,6 +56,8 @@ use Thelia\Model\ProductSaleElements;
 use Thelia\Model\ProductSaleElementsQuery;
 use Thelia\Model\TaxRuleI18n;
 use Thelia\Tools\I18n;
+
+
 
 /**
  * Class Order.
@@ -85,13 +92,24 @@ class Order extends BaseAction implements EventSubscriberInterface
         $event->setOrder($order);
     }
 
-    public function setDeliveryModule(OrderEvent $event): void
+    public function setDeliveryModule(OrderEvent $event,): void
     {
         $order = $event->getOrder();
 
         $deliveryModuleId = $event->getDeliveryModule();
 
-        $order->setDeliveryModuleId($deliveryModuleId);
+        if (null === $deliveryModuleId) {
+            throw new \InvalidArgumentException('Delivery module ID cannot be null');
+        }
+
+        $deliveryModuleName = ModuleQuery::create()->findOneById($deliveryModuleId)->getTitle();
+        $deliveryModuleCode = ModuleQuery::create()->findOneById($deliveryModuleId)->getCode();
+
+        $orderModuleDelivery = new OrderModuleDelivery();
+        $orderModuleDelivery->setModuleId($deliveryModuleId);
+        $orderModuleDelivery->setDeliveryModuleName($deliveryModuleName);
+        $orderModuleDelivery->setDeliveryModuleCode($deliveryModuleCode);
+        $orderModuleDelivery->save();
 
         // Reset postage cost if the delivery module had been removed
         if ($deliveryModuleId <= 0) {
@@ -99,6 +117,8 @@ class Order extends BaseAction implements EventSubscriberInterface
             $order->setPostageTax(0);
             $order->setPostageTaxRuleTitle(null);
         }
+
+        $order->setOrderDeliveryModuleId($orderModuleDelivery->getModuleId());
 
         $event->setOrder($order);
     }
@@ -127,7 +147,23 @@ class Order extends BaseAction implements EventSubscriberInterface
     {
         $order = $event->getOrder();
 
-        $order->setPaymentModuleId($event->getPaymentModule());
+        $paymentModuleId = $event->getPaymentModule();
+
+        if (null === $paymentModuleId) {
+            throw new \InvalidArgumentException('Payment module ID cannot be null');
+        }
+
+        $paymentModuleName = ModuleQuery::create()->findOneById($paymentModuleId)->getTitle();
+        $paymentModuleCode = ModuleQuery::create()->findOneById($paymentModuleId)->getCode();
+
+        $orderModulePayment = new OrderModulePayment();
+        $orderModulePayment->setModuleId($paymentModuleId);
+        $orderModulePayment->setPaymentModuleName($paymentModuleName);
+        $orderModulePayment->setPaymentModuleCode($paymentModuleCode);
+        $orderModulePayment->save();
+
+
+        $order->setOrderPaymentModuleId($orderModulePayment->getModuleId());
 
         $event->setOrder($order);
     }
@@ -148,8 +184,8 @@ class Order extends BaseAction implements EventSubscriberInterface
         LangModel $lang,
         CartModel $cart,
         UserInterface $customer,
-        $unusedArgument = null,
-        $useOrderDefinedAddresses = false
+                                 $unusedArgument = null,
+                                 $useOrderDefinedAddresses = false
     ) {
         $con = Propel::getConnection(
             OrderTableMap::DATABASE_NAME
@@ -395,9 +431,6 @@ class Order extends BaseAction implements EventSubscriberInterface
     {
         $session = $this->getSession();
 
-        $order = $event->getOrder();
-        $paymentModule = ModuleQuery::create()->findPk($order->getPaymentModuleId());
-
         $placedOrder = $this->createOrder(
             $dispatcher,
             $event->getOrder(),
@@ -422,7 +455,6 @@ class Order extends BaseAction implements EventSubscriberInterface
             $event->setResponse($payEvent->getResponse());
         }
     }
-
     public function orderBeforePayment(OrderEvent $event, $eventName, EventDispatcherInterface $dispatcher): void
     {
         $dispatcher->dispatch(clone $event, TheliaEvents::ORDER_SEND_CONFIRMATION_EMAIL);

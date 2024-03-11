@@ -611,11 +611,11 @@
     <column defaultValue="0.000000" name="postage" required="true" scale="6" size="16" type="DECIMAL" />
     <column defaultValue="0.000000" name="postage_tax" required="true" scale="6" size="16" type="DECIMAL" />
     <column name="postage_tax_rule_title" size="255" type="VARCHAR" />
-    <column name="payment_module_id" required="true" type="INTEGER" />
-    <column name="delivery_module_id" required="true" type="INTEGER" />
     <column name="status_id" required="true" type="INTEGER" />
     <column name="lang_id" required="true" type="INTEGER" />
     <column name="cart_id" required="true" type="INTEGER" />
+    <column name="order_payment_module_id" type="INTEGER"/>
+    <column name="order_delivery_module_id" type="INTEGER"/>
     <foreign-key foreignTable="currency" name="fk_order_currency_id" onDelete="RESTRICT" onUpdate="RESTRICT">
       <reference foreign="id" local="currency_id" />
     </foreign-key>
@@ -631,11 +631,11 @@
     <foreign-key foreignTable="order_status" name="fk_order_status_id" onDelete="RESTRICT" onUpdate="RESTRICT">
       <reference foreign="id" local="status_id" />
     </foreign-key>
-    <foreign-key foreignTable="module" name="fk_order_payment_module_id" onDelete="RESTRICT" onUpdate="RESTRICT">
-      <reference foreign="id" local="payment_module_id" />
+    <foreign-key foreignTable="order_module_payment" name="fk_order_order_module_payment_id" onDelete="RESTRICT" onUpdate="RESTRICT">
+      <reference foreign="module_id" local="order_payment_module_id"/>
     </foreign-key>
-    <foreign-key foreignTable="module" name="fk_order_delivery_module_id" onDelete="RESTRICT" onUpdate="RESTRICT">
-      <reference foreign="id" local="delivery_module_id" />
+    <foreign-key foreignTable="order_module_delivery" name="fk_order_order_module_delivery_id" onDelete="RESTRICT" onUpdate="RESTRICT">
+      <reference foreign="module_id" local="order_delivery_module_id"/>
     </foreign-key>
     <foreign-key foreignTable="lang" name="fk_order_lang_id" onDelete="RESTRICT" onUpdate="RESTRICT">
       <reference foreign="id" local="lang_id" />
@@ -670,11 +670,35 @@
     <index name="idx_order_cart_fk">
       <index-column name="cart_id" />
     </index>
+    <index name="fk_order_order_module_payment_id">
+      <index-column name="order_module_payment_id"/>
+    </index>
+    <index name="fk_order_order_module_delivery_id">
+      <index-column name="order_module_delivery_id"/>
+    </index>
     <behavior name="timestampable" />
     <behavior name="versionable">
       <parameter name="log_created_at" value="true" />
       <parameter name="log_created_by" value="true" />
     </behavior>
+  </table>
+  <table name="order_module_payment" namespace="Thelia\Model">
+    <column autoIncrement="true" primaryKey="true"  name="id" type="INTEGER" />
+    <column name="payment_module_name" type="VARCHAR" size="255" />
+    <column name="module_id" type="INTEGER" />
+    <column name="payment_module_code" type="VARCHAR" size="255" />
+    <index name="idx_order_module_payment_module_id">
+      <index-column name="module_id" />
+    </index>
+  </table>
+  <table name="order_module_delivery" namespace="Thelia\Model">
+    <column autoIncrement="true" primaryKey="true" name="id" type="INTEGER" />
+    <column name="delivery_module_name" type="VARCHAR" size="255" />
+    <column name="module_id" type="INTEGER" />
+    <column name="delivery_module_code" type="VARCHAR" size="255" />
+    <index name="idx_order_module_delivery_module_id">
+      <index-column name="module_id" />
+    </index>
   </table>
   <table name="currency" namespace="Thelia\Model">
     <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />

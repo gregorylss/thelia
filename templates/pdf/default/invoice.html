@@ -279,7 +279,7 @@
 
                 <h3>{intl l="Payment module"}</h3>
                 <p>
-                    <span>{loop name="payment-module" type="module" id=$PAYMENT_MODULE}{$TITLE}{/loop}</span>
+                    <span>{$PAYMENT_MODULE} - {$PAYMENT_MODULE_CODE}</span>
                 </p>
 
                 {hook name="invoice.after-payment-module" order=$order_id module_id=$PAYMENT_MODULE}
@@ -287,7 +287,7 @@
 
                 <h3>{intl l="Delivery module"}</h3>
                 <p>
-                    <span>{loop name="delivery-module" type="module" id=$DELIVERY_MODULE}{$TITLE}{/loop}</span>
+                    <span>{loop name="delivery-module" type="order" id=$ID}{$DELIVERY_MODULE}{/loop}</span>
                 </p>
 
                 {hook name="invoice.after-delivery-module" order=$order_id module_id=$DELIVERY_MODULE}

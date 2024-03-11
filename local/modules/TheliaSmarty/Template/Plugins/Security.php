@@ -112,12 +112,12 @@ class Security extends AbstractSmartyPlugin
         /* Does address and module still exists ? We assume address owner can't change neither module type */
         if ($order !== null) {
             $checkAddress = AddressQuery::create()->findPk($order->getChoosenDeliveryAddress());
-            $checkModule = ModuleQuery::create()->findPk($order->getDeliveryModuleId());
+            $checkModule = ModuleQuery::create()->findPk($order->getOrderDeliveryModuleId());
         } else {
             $checkAddress = $checkModule = null;
         }
 
-        if (null === $order || null == $checkAddress || null === $checkModule) {
+        if (null === $order || null == $checkAddress || null === $checkModule ) {
             throw new OrderException('Delivery must be defined', OrderException::UNDEFINED_DELIVERY, ['missing' => 1]);
         }
 

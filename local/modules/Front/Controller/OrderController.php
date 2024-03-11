@@ -155,10 +155,10 @@ class OrderController extends BaseFrontController
 
             /* check that the delivery module fetches the delivery address area */
             if (null === AreaDeliveryModuleQuery::create()->findByCountryAndModule(
-                $deliveryAddress->getCountry(),
-                $deliveryModule,
-                $deliveryAddress->getState()
-            )) {
+                    $deliveryAddress->getCountry(),
+                    $deliveryModule,
+                    $deliveryAddress->getState()
+                )) {
                 throw new \Exception(
                     $this->getTranslator()->trans(
                         'Delivery module cannot be use with selected delivery address',

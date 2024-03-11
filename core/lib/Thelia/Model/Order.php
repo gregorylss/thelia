@@ -33,6 +33,50 @@ class Order extends BaseOrder
 
     protected $disableVersioning = false;
 
+    protected $payment_module_id;
+
+    /**
+     * @param int $payment_module_id deprecated argument. Will be removed in 2.5
+     *
+     * @return $this
+     */
+    public function getPaymentModuleId()
+    {
+        return $this->payment_module_id;
+    }
+
+    /**
+     * @param mixed $payment_module_id
+     */
+    public function setPaymentModuleId($payment_module_id): void
+    {
+        $this->payment_module_id = $payment_module_id;
+    }
+
+    protected $delivery_module_id;
+
+    /**
+     * @param int $delivery_module_id deprecated argument. Will be removed in 2.5
+     *
+     * @return $this
+     */
+    /**
+     * @return mixed
+     */
+    public function getDeliveryModuleId()
+    {
+        return $this->delivery_module_id;
+    }
+
+    /**
+     * @param mixed $delivery_module_id
+     */
+    public function setDeliveryModuleId($delivery_module_id): void
+    {
+        $this->delivery_module_id = $delivery_module_id;
+    }
+
+
     /**
      * @param int $choosenDeliveryAddress the choosen delivery address ID
      *
@@ -509,8 +553,8 @@ class Order extends BaseOrder
      */
     public function getPaymentModuleInstance()
     {
-        if (null === $paymentModule = ModuleQuery::create()->findPk($this->getPaymentModuleId())) {
-            throw new TheliaProcessException('Payment module ID='.$this->getPaymentModuleId().' was not found.');
+        if (null === $paymentModule = ModuleQuery::create()->findPk($this->getOrderPaymentModuleId())) {
+            throw new TheliaProcessException('Payment module ID='.$this->getOrderPaymentModuleId().' was not found.');
         }
 
         return $paymentModule->createInstance();
@@ -525,12 +569,13 @@ class Order extends BaseOrder
      */
     public function getDeliveryModuleInstance()
     {
-        if (null === $deliveryModule = ModuleQuery::create()->findPk($this->getDeliveryModuleId())) {
-            throw new TheliaProcessException('Delivery module ID='.$this->getDeliveryModuleId().' was not found.');
+        if (null === $deliveryModule = ModuleQuery::create()->findPk($this->getOrderDeliveryModuleId())) {
+            throw new TheliaProcessException('Delivery module ID='.$this->getOrderDeliveryModuleId().' was not found.');
         }
 
         return $deliveryModule->createInstance();
     }
+
 
     /**
      * Check if stock was decreased at stock creation for this order.

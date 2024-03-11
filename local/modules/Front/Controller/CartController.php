@@ -199,7 +199,7 @@ class CartController extends BaseFrontController
         /* recalculate postage amount */
         $order = $this->getSession()->getOrder();
         if (null !== $order) {
-            $deliveryModule = $order->getModuleRelatedByDeliveryModuleId();
+            $deliveryModule = $order->getOrderDeliveryModuleId();
             $deliveryAddress = AddressQuery::create()->findPk($order->getChoosenDeliveryAddress());
 
             if (null !== $deliveryModule && null !== $deliveryAddress) {

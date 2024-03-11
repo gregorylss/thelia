@@ -54,9 +54,9 @@
         <p>
             {intl l="Order Total:"} {format_money number=$TOTAL_TAXED_AMOUNT currency_id=$CURRENCY}<br />
             {intl l="Order Number:"} {$REF}<br />
-            {intl l="Paid With:"} {loop name="payment-module" type="module" id=$PAYMENT_MODULE}{$TITLE}{/loop}<br />
+            {intl l="Paid With:"} {$PAYMENT_MODULE} - {$PAYMENT_MODULE_CODE}<br />
             {intl l="Purchase Date:"} {format_date date=$CREATE_DATE output="datetime"}<br />
-            {intl l="Delivery method:"} {loop name="delivery-module" type="module" id=$DELIVERY_MODULE}{$TITLE}{/loop}<br />
+            {intl l="Delivery method:"} {$DELIVERY_MODULE} - {$DELIVERY_MODULE_CODE}<br />
         </p>
 
         {hook name="email-html.order-notification.before-products" order=$order_id}

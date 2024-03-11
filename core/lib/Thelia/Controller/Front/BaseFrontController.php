@@ -52,9 +52,9 @@ class BaseFrontController extends BaseController
         $order = $this->getSession()->getOrder();
         if (null === $order
             || null === $order->getChoosenDeliveryAddress()
-            || null === $order->getDeliveryModuleId()
+            || null === $order->getOrderDeliveryModuleId()
             || null === AddressQuery::create()->findPk($order->getChoosenDeliveryAddress())
-            || null === ModuleQuery::create()->findPk($order->getDeliveryModuleId())) {
+            || null === ModuleQuery::create()->findPk($order->getOrderDeliveryModuleId())) {
             throw new RedirectException($this->retrieveUrlFromRouteId('order.delivery'));
         }
     }
@@ -64,9 +64,9 @@ class BaseFrontController extends BaseController
         $order = $this->getSession()->getOrder();
         if (null === $order
             || null === $order->getChoosenInvoiceAddress()
-            || null === $order->getPaymentModuleId()
+            || null === $order->getOrderPaymentModuleId()
             || null === AddressQuery::create()->findPk($order->getChoosenInvoiceAddress())
-            || null === ModuleQuery::create()->findPk($order->getPaymentModuleId())) {
+            || null === ModuleQuery::create()->findPk($order->getOrderPaymentModuleId())) {
             throw new RedirectException($this->retrieveUrlFromRouteId('order.invoice'));
         }
     }

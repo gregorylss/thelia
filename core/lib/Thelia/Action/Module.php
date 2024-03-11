@@ -215,20 +215,6 @@ class Module extends BaseAction implements EventSubscriberInterface
                     );
                 }
 
-                // If the module is referenced by an order, display a meaningful error
-                // instead of 'delete cannot delete' caused by a constraint violation.
-                // FIXME: we hav to find a way to delete modules used by order.
-                if (OrderQuery::create()->filterByDeliveryModuleId($module->getId())->count() > 0
-                    || OrderQuery::create()->filterByPaymentModuleId($module->getId())->count() > 0
-                ) {
-                    throw new \LogicException(
-                        Translator::getInstance()->trans(
-                            'The module "%name%" is currently in use by at least one order, and can\'t be deleted.',
-                            ['%name%' => $module->getCode()]
-                        )
-                    );
-                }
-
                 try {
                     if ($module->getMandatory() == BaseModule::IS_MANDATORY && $event->getAssumeDelete() === false) {
                         throw new \Exception(
@@ -382,24 +368,21 @@ class Module extends BaseAction implements EventSubscriberInterface
     {
         $order = $event->getOrder();
 
-        /* call pay method */
-        if (null === $paymentModule = ModuleQuery::create()->findPk($order->getPaymentModuleId())) {
+        $paymentModuleId = $order->getOrderPaymentModuleId();
+
+        $paymentModule = ModuleQuery::create()->findPk($paymentModuleId);
+
+        if ($paymentModule === null) {
             throw new \RuntimeException(
-                Translator::getInstance()->trans(
-                    'Failed to find a payment Module with ID=%mid for order ID=%oid',
-                    [
-                        '%mid' => $order->getPaymentModuleId(),
-                        '%oid' => $order->getId(),
-                    ]
-                )
+                'Failed to find a payment Module with ID='.$paymentModuleId.' for order ID='.$order->getId()
             );
         }
 
-        $paymentModuleInstance = $paymentModule->getPaymentModuleInstance($this->container);
+        $paymentModuleInstance = $paymentModule->createInstance();
 
         $response = $paymentModuleInstance->pay($order);
 
-        if (null !== $response && $response instanceof Response) {
+        if ($response instanceof Response) {
             $event->setResponse($response);
         }
     }

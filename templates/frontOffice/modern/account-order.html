@@ -107,7 +107,7 @@
                             {hook name="account-order.invoice-information" module={$payment_id} order={$order_id}}
                         {/ifhook}
                         {elsehook rel="account-order.invoice-information"}
-                            <p>{loop name="payment-module" type="module" id=$PAYMENT_MODULE}{$TITLE}{/loop}</p>
+                            <p>{$PAYMENT_MODULE}</p>
                             {if $TRANSACTION_REF}
                             <p>{intl l="Transaction REF : %ref" ref={$TRANSACTION_REF}}</p>
                             {/if}
